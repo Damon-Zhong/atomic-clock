@@ -74,9 +74,32 @@ function clearParticles() {
 
 function getText() {
   return new Date().toTimeString().substring(0, 8);
-} 
+}
 
-function getDrawablePoints(){}
+function getDrawablePoints() {
+  const { width, height } = canvas;
+  const { data } = ctx.getImageData(0, 0, width, height);
+  const gap = 6; // 画圈点之间允许的空隙
+  const result = [];
+
+  for (let i = 0; i < width; i += gap) {
+    for (let j = 0; i < height; j += gap) {
+      // 4个值为一组代表一个像素点的着色
+      const pointIdx = (i + j * width) * 4;
+      const r = data[pointIdx];
+      const g = data[pointIdx + 1];
+      const b = data[pointIdx + 2];
+      const a = data[pointIdx + 3];
+
+      // 找到黑色的像素点
+      if (r === 0 && g === 0 && b === 0 && a === 255) {
+        result.push([i, j]);
+      }
+    }
+  }
+
+  return result;
+}
 
 function updateParticles() {
   // 1. 画文字
@@ -84,7 +107,7 @@ function updateParticles() {
   if (curText === text) {
     return;
   }
-  clearParticles()
+
   text = curText;
   const { width, height } = canvas;
   ctx.fillStyle = "#000";
@@ -94,13 +117,23 @@ function updateParticles() {
   ctx.fillText(text, width / 2, height / 2);
 
   // 2. 获取文字像素信息
-  const { data } = ctx.getImageData(0,0, width, height)
-  console.log(data)
+  const points = getDrawablePoints();
+  clearParticles();
+  for (let i = 0; i < points.length; i++) {
+    const [x, y] = points[i];
+    let p = particles[i];
+    if (!p) {
+      p = new Particle();
+      particles.push(p);
+    }
+
+    p.moveTo(x, y);
+  }
 }
 
 function redraw() {
   // 清空画布
-//   clearParticles();
+  clearParticles();
   // 更新粒子数量以及每个粒子的位置
   updateParticles();
   for (const particle of particles) {
