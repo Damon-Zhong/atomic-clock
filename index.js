@@ -129,6 +129,10 @@ function updateParticles() {
 
     p.moveTo(x, y);
   }
+
+  if(points.length < particles.length){
+    particles.splice(points.length)
+  }
 }
 
 function redraw() {
