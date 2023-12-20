@@ -18,8 +18,8 @@ function getRandom(min, max) {
 class Particle {
   constructor() {
     this.size = getRandom(2 * devicePixelRatio, 7 * devicePixelRatio);
-    const outterR = Math.min(canvas.width, canvas.height) / 2;
-    const rad = (getRandom(0, 360) * Math.PI) / 100;
+    const outterR = Math.min(canvas.width, canvas.height) / 2 - 100;
+    const rad = (getRandom(0, 360) * Math.PI) / 180;
     const cx = canvas.width / 2;
     const cy = canvas.height / 2;
 
@@ -30,7 +30,7 @@ class Particle {
   draw() {
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.size, 0, 2 * Math.PI);
-    ctx.fillStyle = "#f40";
+    ctx.fillStyle = "#5445543d";
     ctx.fill();
   }
 
@@ -65,7 +65,6 @@ class Particle {
 }
 
 const particles = [];
-const p = new Particle();
 let text = null;
 
 function clearParticles() {
@@ -79,18 +78,19 @@ function getText() {
 function getDrawablePoints() {
   const { width, height } = canvas;
   const { data } = ctx.getImageData(0, 0, width, height);
-  const gap = 6; // 画圈点之间允许的空隙
+
+  const gap = 3; // 画圈点之间允许的空隙
   const result = [];
 
-  for (let i = 0; i < width; i += gap) {
-    for (let j = 0; i < height; j += gap) {
+  for (let i = 0; i < width; i+=gap) {
+    for (let j = 0; j < height; j+=gap) {
       // 4个值为一组代表一个像素点的着色
       const pointIdx = (i + j * width) * 4;
       const r = data[pointIdx];
       const g = data[pointIdx + 1];
       const b = data[pointIdx + 2];
       const a = data[pointIdx + 3];
-
+      
       // 找到黑色的像素点
       if (r === 0 && g === 0 && b === 0 && a === 255) {
         result.push([i, j]);
@@ -107,7 +107,6 @@ function updateParticles() {
   if (curText === text) {
     return;
   }
-
   text = curText;
   const { width, height } = canvas;
   ctx.fillStyle = "#000";
@@ -130,21 +129,21 @@ function updateParticles() {
     p.moveTo(x, y);
   }
 
-  if(points.length < particles.length){
-    particles.splice(points.length)
+  if (points.length < particles.length) {
+    particles.splice(points.length);
   }
 }
 
 function redraw() {
   // 清空画布
   clearParticles();
-  // 更新粒子数量以及每个粒子的位置
+  // 更新粒子数量以及每个粒子的位置 
   updateParticles();
-  for (const particle of particles) {
-    particle.draw();
+  for (const p of particles) {
+    p.draw();
   }
   // 注册动画事件重新绘制
   requestAnimationFrame(redraw);
 }
 
-redraw();
+ redraw();
